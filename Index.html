@@ -16,30 +16,30 @@
 	
 	<!-- openlayers mapscript -->
 	<script src="js/OpenLayers.js"></script>
-	<script>
-      function init() {
-        map = new OpenLayers.Map("map");
-        var mapnik         = new OpenLayers.Layer.OSM();
-        var fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
-        var toProjection   = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
-        var position       = new OpenLayers.LonLat(101.45000,0.53333).transform( fromProjection, toProjection);
-        var zoom           = 9; 
- 
-        map.addLayer(mapnik);
-        map.setCenter(position, zoom );
-      }
-    </script>
+	<script src="js/DeleteFeature.js"></script>
+	<script src="js/EditingPanel.js"></script>
+	<link rel="stylesheet" href="js/theme/default/style.css">
+	<link rel="stylesheet" href="css/editing-panel.css" type="text/css">
+	
 	<style type="text/css">
-      html, body, #map {
-          width: 100%;
-          height: 100%;
-          margin: 0;
-      }
+    html, body, #map {
+        height: 100%;
+	}
+	.olControlAttribution {
+		bottom:5px;
+	}	
+	.olControlMousePosition {
+		padding-bottom:50px;
+		left:5px;
+	}
+	.olControlZoom {
+		z-index:0;
+	}
     </style>
 
 	</head>
 
-<body onload="init();">
+<body onload="initMap()">
     
 	<!--Navbar-->
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -55,8 +55,42 @@
             
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav pull-right">
-                        <li><a href="#masuk" data-toggle="modal">Masuk</a></li>
-                        <li><a href="#hubungi" data-toggle="modal">Hubungi kami</a></li>
+                    <li>
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Masuk <b class="caret"></b></a>
+                        <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
+						   <li>
+								<div class="row">
+								<div class="col-md-12">
+								<form class="form" role="form" method="post" action="login" accept-charset="UTF-8" id="login-nav">
+								   <div class="form-group">
+								  <label class="sr-only" for="exampleInputEmail2">Email address</label>
+								  <input type="email" class="form-control" id="exampleInputEmail2" placeholder="Email address" required>
+								   </div>
+								   <div class="form-group">
+								  <label class="sr-only" for="exampleInputPassword2">Password</label>
+								  <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Password" required>
+								   </div>
+								   <div class="checkbox">
+								  <label>
+								  <input type="checkbox"> Remember me
+								  </label>
+								   </div>
+								   <div class="form-group">
+								  <button type="submit" class="btn btn-success btn-block">Sign in</button>
+								   </div>
+								</form>
+								</div>
+							  </div>
+							</li>
+							<li class="divider"></li>
+							<li>
+							<input class="btn btn-primary btn-block" type="button" id="sign-in-google" value="Sign In with Google">
+							<input class="btn btn-primary btn-block" type="button" id="sign-in-twitter" value="Sign In with Twitter">
+							</li>
+						</ul>
+                    </li>
+                    <li><a href="#hubungi" data-toggle="modal">Hubungi kami</a></li>
+					<li><a href="#bantuan" data-toggle="modal">Bantuan</a></li>
                 </ul>
 			</div>
         </div>
@@ -68,43 +102,29 @@
         <ul class="sidebar-nav">
             <a id="menu-close" href="#" class="btn btn-default btn-lg pull-right toggle"><i class="fa fa-times"></i></a>
                 <!--this is accordion-->
-        	<div class="container">
+        	<div class="container" style="height:100%">
                     <div class="row">
                         <div class="col-sm-3 col-md-3">
                             <div class="panel-group" id="accordion">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion" href="#menuPertama">
-                                                Menu Pertama
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#daftarLayer">
+                                                Daftar Layer
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="menuPertama" class="panel-collapse collapse">
+                                    <div id="daftarLayer" class="panel-collapse collapse in">
                                         <div class="panel-body">
-                                            <table class="table">
-                                                <tr>
-                                                    <td>
-                                                        <a href="#">first item</a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <a href="#">second item</a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <a href="#">third item</a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <a href="#">Comments</a>
-                                                        <span class="badge">42</span>
-                                                    </td>
-                                                </tr>
-                                            </table>
+                                            <label class="checkbox">
+						<input type="checkbox" id="layerJalan">Layer Jalan</input>
+					    </label>
+					    <label class="checkbox">
+						<input type="checkbox" id="layerAdmin">Layer Batas Administrasi</input>
+					    </label>
+					    <label class="checkbox">
+						<input type="checkbox" id="layerBackground">Layer Background</input>
+					    </label>
                                         </div>
                                     </div>                                    
                                 </div>
@@ -113,12 +133,12 @@
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion" href="#menuKedua">
-                                                Menu Kedua
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#query">
+                                                Pencarian
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="menuKedua" class="panel-collapse collapse">
+                                    <div id="query" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <table class="table">
                                                 <tr>
@@ -151,12 +171,12 @@
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion" href="#menuKetiga">
-                                                Menu Ketiga
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#editData">
+                                                Edit Data
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="menuKetiga" class="panel-collapse collapse">
+                                    <div id="editData" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <table class="table">
                                                 <tr>
@@ -184,9 +204,21 @@
                                         </div>
                                     </div>                                    
                                 </div>
-                                <!--menu end-->
-                            </div>
-                        </div>
+                   
+					           <input id="toggle-id" type="checkbox">
+                               <label for="toggle-id">draw</label>
+							   
+							   <!--
+							   <div id='asd'>
+							   <script>
+							   var panel = new EditingPanel('asd', jalan);
+							   map.addControl(panel);
+							   </script>
+							   </div>
+							   -->
+					</div>
+				
+						</div>
                     </div>
                 </div>
                 
@@ -197,24 +229,13 @@
 	
 	<!--Muka Peta-->
 	<section id="mukapeta">
-		<div id="map"></div>
+		<script type="text/javascript" src="basemap.js"></script>
+		<div id="map">
+		</div>
 	</section>
 	
 	
-    <!-- Footer-->
-	<footer>
-		<div class="navbar navbar-default navbar-fixed-bottom">
-			<div class="container">
-				<p class="navbar-text">Copyright &copy; Kuantan Singingi </p>
-			</div>  
-		</div>
-	</footer>
-
-	<!-- references. ditaruh di belakang biar gak lemot -->
-    <script src="js/jquery.js" ></script>
-    <script src="js/bootstrap.js" ></script>
-	
-	<!--kotak dialog Masuk Admin-->
+    <!--kotak dialog Masuk Admin-->
 	<div class="modal fade" id="masuk">
 	    <div class="modal-dialog">
 		<div class="modal-content">
@@ -290,8 +311,22 @@
 	    </div>
 	</div>
 	
+	
+	
+	<!-- Footer-->
+	<footer>
+		<div class="navbar navbar-default navbar-fixed-bottom">
+			<div class="container">
+				<p class="navbar-text">Copyright 2014 &copy; Kuantan Singingi </p>
+			</div>  
+		</div>
+	</footer>
+
+	<!-- references. ditaruh di belakang biar gak lemot -->
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="js/bootstrap.js" ></script>
         
-	<!-- Side Menu -->
+	<!-- Script for side Menu -->
     <script>
     $("#menu-close").click(function(e) {
         e.preventDefault();
