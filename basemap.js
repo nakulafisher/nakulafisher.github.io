@@ -5,6 +5,7 @@ function initMap() {
 	var geographic = new OpenLayers.Projection("EPSG:4326");
     var mercator = new OpenLayers.Projection("EPSG:900913");
 	
+	//sebelah saya orang
 	
 	//map container
 	map = new OpenLayers.Map("map",
